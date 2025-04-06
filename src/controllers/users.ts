@@ -1,7 +1,10 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import User from '../models/user';
+
 const NotFoundError = require('../errors/not-found-err');
+
 const IncorrectData = require('../errors/incorrect-data');
+
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const users = await User.find({});
@@ -10,26 +13,26 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
     next(error);
   }
 };
-export const createUser = async (req: Request, res: Response,  next: NextFunction):Promise<any> => {
+export const createUser = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
   const { name, about, avatar } = req.body;
   try {
-    if(!name || name.length < 2 ||  name.length > 30) {
+    if (!name || name.length < 2 || name.length > 30) {
       throw new IncorrectData('Некорректные данные в поле name');
     }
     if (!about || about.length < 2 || about.length > 200) {
       throw new IncorrectData('Некорректные данные в поле about');
     }
-    if(!avatar) {
+    if (!avatar) {
       throw new IncorrectData('Некорректные данные в поле avatar');
     }
     /* напишите код здесь */
-    return User.create({name, about, avatar})
-      .then((user) => res.send({data: user}))
+    return User.create({ name, about, avatar })
+      .then((user) => res.send({ data: user }))
       .catch(next);
-  }catch(error) {
-    next(error)
+  } catch (error) {
+    next(error);
   }
-}
+};
 export const getUserById = async (req: Request, res: Response, next: NextFunction):Promise<any> => {
   const userId = req.params.id;
 
