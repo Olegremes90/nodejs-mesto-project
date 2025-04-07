@@ -5,7 +5,6 @@ export interface IUser {
   about: string;
   avatar: string;
 }
-// Опишем схему:
 const userSchema = new mongoose.Schema<IUser>({
   name: {
     type: String,
