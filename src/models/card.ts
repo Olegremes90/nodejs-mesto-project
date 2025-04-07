@@ -6,7 +6,7 @@ interface ICard extends Document {
   likes: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
-// Определение схемы карточки
+
 const cardSchema = new Schema<ICard>({
   name: {
     type: String,
@@ -21,18 +21,17 @@ const cardSchema = new Schema<ICard>({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'user ', // Ссылка на модель автора карточки
+    ref: 'user ',
   },
   likes: {
     type: [mongoose.Schema.Types.ObjectId],
-    default: [], // По умолчанию пустой массив
-    ref: 'user ', // Ссылка на модель пользователей, которые лайкнули карточку
+    default: [],
+    ref: 'user ',
   },
   createdAt: {
     type: Date,
-    default: Date.now, // Значение по умолчанию - текущее время
+    default: Date.now,
   },
 });
-// Создание модели карточки
 
 export default  mongoose.model<ICard>('card', cardSchema);
