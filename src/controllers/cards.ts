@@ -1,18 +1,18 @@
 import {Request, Response, NextFunction} from "express";
 import Card from "../models/card";
-const NotFoundError = require('../errors/not-found-err');
-const IncorrectData = require('../errors/incorrect-data');
+import NotFoundError from '../errors/not-found-err';
+import IncorrectData from '../errors/incorrect-data';
+
 declare global {
   namespace Express {
     interface Request {
       user: {
-        _id: string; // или другой тип, который вы используете
-        // добавьте другие поля, если необходимо
+        _id: string;
       };
     }
   }
 }
-//const ServerError = require('../errors/server-error');
+
 export const getCard = async (req: Request, res: Response, next:NextFunction): Promise<any> => {
   try {
     const cards = await Card.find({});
@@ -32,7 +32,7 @@ export const createCard = async (req: Request, res: Response, next:NextFunction)
         owner = req.user._id;
       }
       return Card.create({name, link, owner})
-        .then((card) => res.send({data: card}))
+        .then((card) => res.status(201).send({data: card}))
         .catch(next)
     }catch(error){
       next(error);
@@ -62,7 +62,7 @@ export const likeCard = async (req: Request, res: Response, next: NextFunction):
     }
     return Card.findByIdAndUpdate(
       cardId,
-      {$addToSet: {likes: req.user._id}}, // добавить _id в массив, если его там нет
+      {$addToSet: {likes: req.user._id}},
       {new: true},
     )
       .then((likedCard) => res.send({data: likedCard}))
@@ -81,7 +81,7 @@ export const dislikeCard = async (req: Request, res: Response, next: NextFunctio
     }
     return Card.findByIdAndUpdate(
       cardId,
-      {$pull: {likes: req.user._id}}, // добавить _id в массив, если его там нет
+      {$pull: {likes: req.user._id}},
       {new: true},
     )
       .then((likedCard) => res.send({data: likedCard}))
