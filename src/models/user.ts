@@ -1,26 +1,75 @@
-import mongoose from "mongoose";
-export interface IUser {
+import mongoose, {Document} from "mongoose";
+import validator from "validator";
+import bcrypt from 'bcryptjs';
+
+export interface IUser extends Document {
   id: number;
   name: string;
   about: string;
   avatar: string;
+  password: string;
+  email: string;
 }
-const userSchema = new mongoose.Schema<IUser>({
-  name: {
+interface UserModel extends mongoose.Model<IUser> {
+  findUserByCredentials: (email: string, password: string) => Promise<mongoose.Document<unknown, any, IUser>>
+}
+
+const userSchema = new mongoose.Schema<IUser >({
+  email: {
+    type: String,
+    required: [true, 'Не передан обязательный параметр - email'],
+    unique: true,
+    validate: {
+      validator: (value: string) => validator.isEmail(value),
+      message: 'Некорректный формат email',
+    },
+  },
+  password: {
     type: String,
     required: true,
+    minlength: 6,
+    select: false,
+  },
+  name: {
+    type: String,
     minlength: 2,
     maxlength: 30,
+    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 200,
+    default: 'Исследователь',
   },
   avatar: {
     type: String,
-    required: true,
-  }
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (value: string) => /^(https?:\/\/)(www\.)?([a-zA-Z0-9-]+\.ru)(\/[\/\w\-._~:/?#\[\]@!$&'()*+,;=]*)?$/.test(value),
+      message: 'Некорректный url для поля avatar',
+    },
+  },
 });
-export default mongoose.model<IUser>('user', userSchema);
+
+userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
+  return this.findOne({ email }).select('+password')
+    .then((user:IUser) => {
+
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Неправильные почта или пароль'));
+          }
+
+          return user; // теперь user доступен
+        });
+    });
+});
+
+// Создание модели пользователя
+export default mongoose.model<IUser, UserModel>('user ', userSchema);

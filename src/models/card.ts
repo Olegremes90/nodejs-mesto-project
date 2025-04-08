@@ -6,7 +6,7 @@ interface ICard extends Document {
   likes: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
-
+// Определение схемы карточки
 const cardSchema = new Schema<ICard>({
   name: {
     type: String,
@@ -33,5 +33,6 @@ const cardSchema = new Schema<ICard>({
     default: Date.now,
   },
 });
+
 
 export default  mongoose.model<ICard>('card', cardSchema);

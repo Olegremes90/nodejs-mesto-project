@@ -18,40 +18,43 @@ export const getCard = async (req: Request, res: Response, next:NextFunction): P
     const cards = await Card.find({});
     return res.send({ data: cards});
   } catch (error) {
-   next(error)
+    next(error)
   }
 };
 export const createCard = async (req: Request, res: Response, next:NextFunction): Promise<any> => {
   let owner = '';
-    const {name, link} = req.body;
-    try {
-      if (!name || !link || name.length < 2 || name.length > 30) {
-        throw new IncorrectData('В запросе переданы некорректные данные')
-      }
-      if (req.user) {
-        owner = req.user._id;
-      }
-      return Card.create({name, link, owner})
-        .then((card) => res.status(201).send({data: card}))
-        .catch(next)
-    }catch(error){
-      next(error);
+  const {name, link} = req.body;
+  try {
+    if (!name || !link || name.length < 2 || name.length > 30) {
+      throw new IncorrectData('В запросе переданы некорректные данные')
     }
+    if (req.user) {
+      owner = req.user._id;
+    }
+    return Card.create({name, link, owner})
+      .then((card) => res.status(201).send({data: card}))
+      .catch(next)
+  }catch(error){
+    next(error);
+  }
 };
-
 
 export const deleteCard = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const cardId = req.params.id;
+  const userId = req.user._id;
   return Card.findById(cardId)
-  .then((card)=> {
+    .then((card)=> {
 
-    if (!card) {
-      throw new NotFoundError('Передан несуществующий _id карточки.');
-    }
-    return Card.findByIdAndDelete(cardId)
-      .then((deleteCard)=> { res.status(200).json(deleteCard)})
-      .catch(next);
-  }).catch(next);
+      if (!card) {
+        throw new NotFoundError('Передан несуществующий _id карточки.');
+      }
+      if (card.owner.toString() != userId){
+        throw new NotFoundError('Нет прав на удаление.');
+      }
+      return Card.findByIdAndDelete(cardId)
+        .then((deleteCard)=> { res.status(200).json(deleteCard)})
+        .catch(next);
+    }).catch(next);
 };
 export const likeCard = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const cardId = req.params.id;
@@ -90,6 +93,8 @@ export const dislikeCard = async (req: Request, res: Response, next: NextFunctio
     next(error);
   }
 }
+
+
 
 
 
