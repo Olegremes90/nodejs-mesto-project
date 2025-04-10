@@ -25,18 +25,18 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
 };
 export const createUser = async (req: Request, res: Response,  next: NextFunction):Promise<any> => {
   try {
-
-    const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      throw new FoundExistEmailError('Пользователь с таким email уже существует');
-    }
     bcrypt.hash(req.body.password, 10)
       .then(hash => {
-
-
         return User.create({name: req.body.name , about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
-          .then((user) => res.status(201).send({data: user}))
-          .catch(next)
+          .then((user) => {
+            const { password, ...userWithoutPassword } = user.toObject();
+            res.status(201).send({ data: userWithoutPassword })
+          })
+          .catch(err => {
+            if (err instanceof Error && err.message.includes('E11000')) {
+              throw new FoundExistEmailError('Пользователь с таким email уже существует')
+            }
+          });
       })
       .catch(next)
   }catch(error) {
@@ -63,13 +63,6 @@ export const updateUser = async (req: Request, res: Response, next:NextFunction)
       userId = req.user._id;
     }
     const updates = req.body;
-    if(updates.name.length < 2 ||  updates.name.length > 30) {
-      throw new IncorrectData('Некорректные данные в поле name');
-    }
-    if (updates.about.length < 2 ||  updates.about.length > 200) {
-      throw new IncorrectData('Некорректные данные в поле about');
-    }
-
     const updatedUser  = await User.findByIdAndUpdate(userId, updates, { new: true });
     if (!updatedUser ) {
       throw new NotFoundError('Не найден пользователь для обновления');
@@ -103,7 +96,7 @@ export const updateUserAvatar = async (req: Request, res: Response, next:NextFun
 
 // controllers/users.ts
 
-export const login = (req: Request, res: Response) => {
+export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   console.log(req.body);
   return User.findUserByCredentials(email, password)
@@ -116,9 +109,8 @@ export const login = (req: Request, res: Response) => {
       res.send({ token });
     })
     .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+     next(err)
+
     });
 };
 
