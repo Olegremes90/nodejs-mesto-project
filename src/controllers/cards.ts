@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
 import Card from "../models/card";
 import NotFoundError from '../errors/not-found-err';
-import IncorrectData from '../errors/incorrect-data';
+import ErrorRights from "../errors/not-enough-rights-err";
 
 declare global {
   namespace Express {
@@ -25,9 +25,7 @@ export const createCard = async (req: Request, res: Response, next:NextFunction)
   let owner = '';
   const {name, link} = req.body;
   try {
-    if (!name || !link || name.length < 2 || name.length > 30) {
-      throw new IncorrectData('В запросе переданы некорректные данные')
-    }
+
     if (req.user) {
       owner = req.user._id;
     }
@@ -49,7 +47,7 @@ export const deleteCard = async (req: Request, res: Response, next: NextFunction
         throw new NotFoundError('Передан несуществующий _id карточки.');
       }
       if (card.owner.toString() != userId){
-        throw new NotFoundError('Нет прав на удаление.');
+        throw new ErrorRights('Нет прав на удаление.');
       }
       return Card.findByIdAndDelete(cardId)
         .then((deleteCard)=> { res.status(200).json(deleteCard)})
