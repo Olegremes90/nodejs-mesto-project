@@ -20,3 +20,5 @@ dist
 # logs
 request.log
 error.log
+
+.env

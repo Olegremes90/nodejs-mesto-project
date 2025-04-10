@@ -35,6 +35,9 @@
     "winston": "^3.17.0"
   },
   "dependencies": {
+    "celebrate": "^15.0.3",
+    "dotenv": "^16.4.7",
+    "joi": "^17.13.3",
     "mongoose": "^6.5.0"
   }
 }
