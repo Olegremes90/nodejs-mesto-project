@@ -29,11 +29,11 @@ const auth  = (req: Request, res: Response, next: NextFunction) => {
     throw new AuthorizedError('Необходима авторизация');
   }
 
-
+  const token = authorization.replace('Bearer ', '');
   let payload;
 
     try {
-      payload = jwt.verify(JWT_SECRET, 'some-secret-key') as CustomJwtPayload;
+      payload = jwt.verify(token, JWT_SECRET) as CustomJwtPayload;
       if (!payload) {
          throw new AuthorizedError('Некорректный токен');
          }
