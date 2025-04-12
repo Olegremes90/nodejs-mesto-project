@@ -1,6 +1,5 @@
 import { Joi } from 'celebrate';
 import mongoose from 'mongoose';
-// Определение схемы валидации для пользователя
 const validateUpdateUser  = {
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).optional(),
@@ -55,3 +54,11 @@ const validateSignUp  = {
   })
 }
 export { validateSignUp };
+
+const validateReqId  = {
+
+  params: Joi.object().keys({
+    id: Joi.string().alphanum().length(24),
+  })
+}
+export { validateReqId };
