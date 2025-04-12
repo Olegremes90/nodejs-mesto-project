@@ -8,7 +8,7 @@ import  auth  from './middlewares/auth';
 import { errorLogger, requestLogger }  from './middlewares/logger';
 import {validateSignUp, validateLogin} from './validation/validation';
 import NotFoundError from './errors/not-found-err';
-import {celebrate} from "celebrate";
+import {celebrate, errors} from "celebrate";
 const app = express();
 
 interface CustomError extends Error {
@@ -46,6 +46,7 @@ app.use((req: Request, res: Response, next) => {
   next(new NotFoundError('Маршрут не найден'));
 });
 
+app.use(errors());
 app.use(errorLogger);
 app.use((err:CustomError, req: Request, res: Response, next:NextFunction) => {
   const { statusCode = 500, message } = err;
