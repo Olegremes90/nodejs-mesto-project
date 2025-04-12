@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import FoundExistEmailError from '../errors/sign-exist-email-err';
 import NotFoundError from '../errors/not-found-err';
 import IncorrectData from '../errors/incorrect-data';
+import { config } from 'dotenv';
 
 declare global {
   namespace Express {
@@ -15,6 +16,9 @@ declare global {
     }
   }
 }
+
+config();
+export const { JWT_SECRET = 'JWT_SECRET' } = process.env;
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const users = await User.find({});
@@ -35,6 +39,8 @@ export const createUser = async (req: Request, res: Response,  next: NextFunctio
           .catch(err => {
             if (err instanceof Error && err.message.includes('E11000')) {
               throw new FoundExistEmailError('Пользователь с таким email уже существует')
+            } else {
+              next(err)
             }
           });
       })
@@ -103,7 +109,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
     .then((user) => {
 
 
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
 
       res.send({ token });
