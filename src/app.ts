@@ -46,8 +46,10 @@ app.use((req: Request, res: Response, next) => {
   next(new NotFoundError('Маршрут не найден'));
 });
 
-app.use(errors());
+
 app.use(errorLogger);
+app.use(errors());
+
 app.use((err:CustomError, req: Request, res: Response, next:NextFunction) => {
   const { statusCode = 500, message } = err;
 
