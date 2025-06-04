@@ -19,6 +19,7 @@ declare global {
 
 config();
 export const { JWT_SECRET = 'JWT_SECRET' } = process.env;
+
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const users = await User.find({});
